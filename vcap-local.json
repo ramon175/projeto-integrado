@@ -1,0 +1,19 @@
+{
+    "ENVIRONMENT": "dev",
+    "cloudantNoSQLDB": [{
+        "credentials": {
+            "username": "0ac9d587-a61b-4a54-bd30-750c444c58a1-bluemix",
+            "password": "f0eace7ac7e0c6c47d55e1b2616ab3495778cd62c17156e68688d4ad4b30d46b",
+            "host": "0ac9d587-a61b-4a54-bd30-750c444c58a1-bluemix.cloudant.com",
+            "port": 443,
+            "url": "https://0ac9d587-a61b-4a54-bd30-750c444c58a1-bluemix:f0eace7ac7e0c6c47d55e1b2616ab3495778cd62c17156e68688d4ad4b30d46b@0ac9d587-a61b-4a54-bd30-750c444c58a1-bluemix.cloudant.com"
+        },
+        "label": "cloudantNoSQLDB",
+        "provider": null,
+        "plan": "Lite",
+        "name": "projeto-integrado-cloudantNoSQLDB",
+        "tags": [
+            "data_management"
+        ]
+    }]
+}
