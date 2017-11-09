@@ -12,8 +12,16 @@ var exports =  {
 		},
 		
 		findById:function(req, res){
-			var id = req.params.id || "";
+			var id = req.body.id || "";
+
 			userService.findById(id).then(data => res.send(data)).catch(function(err){ console.log(err)});
+		},
+
+		login:function(req, res){
+			var id = req.body.id || "";
+			var senha = req.body.senha || "";
+
+			userService.login(id,senha).then(data => res.send(data)).catch(function(err){ console.log(err)});
 		},
 		
 		create:function(req, res){
@@ -30,7 +38,8 @@ var exports =  {
 				doc[key] = req.query[key]
 			}
 		
-			userService.create(doc).then(data => res.send(data)).catch((err) => { console.log(err)});
+			userService.create(doc).then(data => {
+				res.send(data)}).catch((err) => { console.log(err)});
 		},
 		
 		update:function(req, res){
@@ -53,24 +62,24 @@ function prepareItem(req){
 	var item;
 	var id = req.query._id || req.query.id || req.body._id || req.body.id || "";
 	var rev = req.query._rev || req.query.rev || req.body._rev || req.body.rev || "";
-	var name = req.body.name || "";
-	var profile = req.body.profile || "";
-	var businessPartner = req.body.businessPartner || "";
-	var active = req.body.active || false;
+	var senha = req.body.senha || "";
+	var local = req.body.local || "";
+	var perfil = req.body.perfil || "";
+	var nome = req.body.nome || "";
+	var razaoSocial = req.body.razaoSocial || "";
 	
 	item = {
 		"_id": id,
 		"type": "USER",
-		"name": name,
-		"profile": profile,
-		"active": active
+		"senha": senha,
+		"local": local,
+		"perfil": perfil,
+		"nome": nome,
+		"razaoSocial": razaoSocial
 	};
 
 	if (rev !== null && rev !== "") {
 		item._rev = rev;
-	}
-	if (businessPartner !== null && businessPartner !== "") {
-		item.businessPartner = businessPartner;
 	}
 	
 	return item;	

@@ -5,4 +5,7 @@ module.exports = function(app){
 
     //user methods
     app.get('/users/listAll', user.listAll);
+    app.post('/users/create', user.create);
+    app.post('/users/login', user.login);
+    app.post('/produtos',user.findById);
 }

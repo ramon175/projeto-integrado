@@ -54,7 +54,7 @@ class CloudantDB {
   save(doc) {
     const promise = this.db.insert(doc);
     return promise
-      .then((result) =>  Object.assign(dbDoc, result));
+      .then((result) =>  result);
   }
 
   update(id, doc) {

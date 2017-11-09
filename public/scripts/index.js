@@ -1,291 +1,164 @@
-// index.js
 
-var REST_DATA = 'api/favorites';
-var KEY_ENTER = 13;
-var defaultItems = [
+//variaveis para determinar a exibição por tipos de produto
+var importado = window.location.href.indexOf('/importados') > 0;
+var nacional = window.location.href.indexOf('/nacionais') > 0;
 
-];
 
-function encodeUriAndQuotes(untrustedStr) {
-    return encodeURI(String(untrustedStr)).replace(/'/g, '%27').replace(')', '%29');
+if (importado || nacional) {
+    $("#carousel").html('');
+    // $("#carousel").css('min-height','10px');
 }
+//
 
-function loadItems() {
-    xhrGet(REST_DATA, function(data) {
+//assim que a pagina carregar, execute o que esta dentro
+$(document).ready(function () {
+    
+    //verificar se o usuario está logado e possui sessao
+    if($.session.get('usuario') != 'null'){
 
-        //stop showing loading message
-        stopLoadingMessage();
+        console.log($.session.get('usuario'));
 
-        var receivedItems = data || [];
-        var items = [];
-        var i;
-        // Make sure the received items have correct format
-        for (i = 0; i < receivedItems.length; ++i) {
-            var item = receivedItems[i];
-            if (item && 'id' in item) {
-                items.push(item);
-            }
-        }
-        var hasItems = items.length;
-        if (!hasItems) {
-            items = defaultItems;
-        }
-        for (i = 0; i < items.length; ++i) {
-            addItem(items[i], !hasItems);
-        }
-        if (!hasItems) {
-            var table = document.getElementById('notes');
-            var nodes = [];
-            for (i = 0; i < table.rows.length; ++i) {
-                nodes.push(table.rows[i].firstChild.firstChild);
+        $("#login").html('Logout');
+
+        $("#login").parent().parent().append('<li class="nav-item"><p class="nav-link">Olá ' + $.session.get('usuario') + '</p></li>');
+        
+    }
+    //
+
+    //carrega a lista de produtos do banco de dados
+    $.post('/produtos', {
+        id: "produtos"
+    }, function (res) {
+        console.log(res);
+
+        for (var produto of res.docs[0].produtos) {
+
+            if (importado && produto.tipo !== "importado") {
+                continue;
             }
 
-            function save() {
-                if (nodes.length) {
-                    saveChange(nodes.shift(), save);
-                }
+            if (nacional && produto.tipo !== "nacional") {
+                continue;
             }
-            save();
+
+            var btnCarrinho = '<i class="material-icons">add_shopping_cart</i>'
+
+            var html = '<div class="col-lg-4 col-md-6 mb-4">\
+        <div class="card h-100">\
+          <a href="#">\
+            <img class="card-img-top" src="images/' + produto.imagem + '" alt="">\
+          </a>\
+          <div class="card-body">\
+            <h4 class="card-title">\
+              <a href="#">' + produto.nome + '</a>\
+            </h4>\
+            <h5>R$' + produto.preço + ',00/Kg</h5>\
+            <p class="card-text">' + produto.descricao + '</p>\
+          </div>\
+          <div class="card-footer">\
+            <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>\
+            '+( $.session.get('usuario') != 'null' ? btnCarrinho :  '')+'\
+          </div>\
+        </div>\
+      </div>';
+
+            $("#productsDiv").append(html);
+
         }
-    }, function(err) {
-        console.error(err);
     });
-}
+    //---------------------
 
-function startProgressIndicator(row) {
-    row.innerHTML = "<td class='content'>Uploading file... <img height=\"50\" width=\"50\" src=\"images/loading.gif\"></img></td>";
-}
-
-function removeProgressIndicator(row) {
-    row.innerHTML = "<td class='content'>uploaded...</td>";
-}
-
-function addNewRow(table) {
-    var newRow = document.createElement('tr');
-    table.appendChild(newRow);
-    return table.lastChild;
-}
-
-function uploadFile(node) {
-
-    var file = node.previousSibling.files[0];
-
-    //if file not selected, throw error
-    if (!file) {
-        alert("File not selected for upload... \t\t\t\t \n\n - Choose a file to upload. \n - Then click on Upload button.");
-        return;
-    }
-
-    var row = node.parentNode.parentNode.parentNode;
-
-    var form = new FormData();
-    form.append("file", file);
-
-    var id = row.getAttribute('data-id');
-
-    var queryParams = "id=" + (id == null ? -1 : id);
-    queryParams += "&name=" + row.firstChild.firstChild.value;
-    queryParams += "&value=" + row.firstChild.nextSibling.firstChild.value;
-
-
-    var table = row.firstChild.nextSibling.firstChild;
-    var newRow = addNewRow(table);
-
-    startProgressIndicator(newRow);
-
-    xhrAttach(REST_DATA + "/attach?" + queryParams, form, function(item) {
-        console.log('Item id - ' + item.id);
-        console.log('attached: ', item);
-        row.setAttribute('data-id', item.id);
-        removeProgressIndicator(row);
-        setRowContent(item, row);
-    }, function(err) {
-        console.error(err);
+    //abre o modal de login caso o usuario nao esteja logado, ou desloga o usuario
+    $("#login").click(function () {
+        if($.session.get('usuario') != 'null'){
+            $.session.set('usuario',null);
+            window.location.href='/';
+        }else{
+        $("#loginModal").modal('toggle');
+        }
     });
+    //
 
-}
+    //pega a lista de paises para alimentar o select de países
+    $.get('/countries', function (data) {
+        $('#countries').append(data);
+    });
+    //
 
-var attachButton = "<br><div class='uploadBox'><input type=\"file\" name=\"file\" id=\"upload_file\"><input width=\"100\" type=\"submit\" value=\"Upload\" onClick='uploadFile(this)'></div>";
+    //requisição para cadastrar um novo usuario
+    $("#formCadastro").submit(function () {
 
-function setRowContent(item, row) {
-    var innerHTML = "<td class='contentName'><textarea id='nameText' class = 'nameText' onkeydown='onKey(event)'>" + item.name + "</textarea></td><td class='contentDetails'>";
+        var email = $("#email").val(),
+            senha = $("#senha").val(),
+            local = $("#countries option:selected").text(),
+            perfil = $('input[name=rgroup]:checked').val(),
+            nome = $("#name").val(),
+            razaoSocial = $("#razao").val();
 
-    var valueTextArea = "<textarea id='valText' onkeydown='onKey(event)' placeholder=\"Enter a description...\"></textarea>";
-    if (item.value) {
-        valueTextArea = "<textarea id='valText' onkeydown='onKey(event)'>" + item.value + "</textarea>";
-    }
-
-    innerHTML += valueTextArea;
-
-
-    var attachments = item.attachements;
-    if (attachments && attachments.length > 0) {
-        innerHTML += "<div class='flexBox'>";
-        for (var i = 0; i < attachments.length; ++i) {
-            var attachment = attachments[i];
-
-            if (attachment.content_type.indexOf("image/") == 0) {
-                innerHTML += "<div class='contentTiles'>" + attachment.key + "<br><img height=\"150\" src=\"" + encodeUriAndQuotes(attachment.url) + "\" onclick='window.open(\"" + encodeUriAndQuotes(attachment.url) + "\")'></img></div>";
-
-            } else if (attachment.content_type.indexOf("audio/") == 0) {
-                innerHTML += "<div class='contentTiles'>" + attachment.key + "<br><AUDIO  height=\"50\" src=\"" + encodeUriAndQuotes(attachment.url) + "\" controls></AUDIO></div>";
-
-            } else if (attachment.content_type.indexOf("video/") == 0) {
-                innerHTML += "<div class='contentTiles'>" + attachment.key + "<br><VIDEO  height=\"150\" src=\"" + encodeUriAndQuotes(attachment.url) + "\" controls></VIDEO></div>";
-
-            } else if (attachment.content_type.indexOf("text/") == 0 || attachment.content_type.indexOf("application/") == 0) {
-                innerHTML += "<div class='contentTiles'><a href=\"" + encodeUriAndQuotes(attachment.url) + "\" target=\"_blank\">" + attachment.key + "</a></div>";
-            }
-
-        }
-        innerHTML += "</div>";
-
-    }
-
-    row.innerHTML = innerHTML + attachButton + "</td><td class = 'contentAction'><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
-
-}
-
-function addItem(item, isNew) {
-
-    var row = document.createElement('tr');
-    row.className = "tableRows";
-    var id = item && item.id;
-    if (id) {
-        row.setAttribute('data-id', id);
-    }
-
-
-
-    if (item) // if not a new row
-    {
-        setRowContent(item, row);
-    } else //if new row
-    {
-        row.innerHTML = "<td class='contentName'><textarea id='nameText' onkeydown='onKey(event)' placeholder=\"Enter a title for your favourites...\"></textarea></td><td class='contentDetails'><textarea id='valText'  onkeydown='onKey(event)' placeholder=\"Enter a description...\"></textarea>" + attachButton + "</td>" +
-            "<td class = 'contentAction'><span class='deleteBtn' onclick='deleteItem(this)' title='delete me'></span></td>";
-    }
-
-    var table = document.getElementById('notes');
-    table.lastChild.appendChild(row);
-    row.isNew = !item || isNew;
-
-    if (row.isNew) {
-        var textarea = row.firstChild.firstChild;
-        textarea.focus();
-    }
-
-}
-
-function deleteItem(deleteBtnNode) {
-    var row = deleteBtnNode.parentNode.parentNode;
-    var attribId = row.getAttribute('data-id');
-    if (attribId) {
-        xhrDelete(REST_DATA + '?id=' + row.getAttribute('data-id'), function() {
-            row.parentNode.removeChild(row);
-        }, function(err) {
-            console.error(err);
-        });
-    } else if (attribId == null) {
-        row.parentNode.removeChild(row);
-    }
-}
-
-function onKey(evt) {
-
-    if (evt.keyCode == KEY_ENTER && !evt.shiftKey) {
-
-        evt.stopPropagation();
-        evt.preventDefault();
-        var nameV, valueV;
-        var row;
-
-        if (evt.target.id == "nameText") {
-            row = evt.target.parentNode.parentNode;
-            nameV = evt.target.value;
-            valueV = row.firstChild.nextSibling.firstChild.value;
-
-        } else {
-            row = evt.target.parentNode.parentNode;
-            nameV = row.firstChild.firstChild.value;
-            valueV = evt.target.value;
-        }
-
-        var data = {
-            name: nameV,
-            value: valueV
+        var userObj = {
+            id: email,
+            senha,
+            local,
+            perfil,
+            nome,
+            razaoSocial
         };
 
-        if (row.isNew) {
-            delete row.isNew;
-            xhrPost(REST_DATA, data, function(item) {
-                row.setAttribute('data-id', item.id);
-            }, function(err) {
-                console.error(err);
+        $.post('/users/create', userObj, function (data) {
+
+            $('#myModal').modal('toggle');
+
+            $("#myModal").on('hidden.bs.modal', function () {
+                window.location.href = '/';
             });
-        } else {
-            data.id = row.getAttribute('data-id');
-            xhrPut(REST_DATA, data, function() {
-                console.log('updated: ', data);
-            }, function(err) {
-                console.error(err);
-            });
+        });
+
+        return false;
+
+    });
+    //
+
+    //requisição de login
+    $('#loginModal').submit(function () {
+        var email = $('#loginEmail').val(),
+            senha = $('#loginSenha').val();
+
+        data = {
+            id: email,
+            senha
         }
 
+        $("#message").html("");
 
-        if (row.nextSibling) {
-            row.nextSibling.firstChild.firstChild.focus();
-        } else {
-            addItem();
-        }
-    }
-}
+        $.post('/users/login', data, function (res) {
+            console.log(res);
 
-function saveChange(contentNode, callback) {
-    var row = contentNode.parentNode.parentNode;
+            if (res.status === "NOT_OK") {
+                $("#message").html("Usuario ou senha incorretos!");
+            }else{
 
-    var data = {
-        name: row.firstChild.firstChild.value,
-        value: row.firstChild.nextSibling.firstChild.value
-    };
+                $.session.set('usuario',res.nome);
 
-    if (row.isNew) {
-        delete row.isNew;
-        xhrPost(REST_DATA, data, function(item) {
-            row.setAttribute('data-id', item.id);
-            callback && callback();
-        }, function(err) {
-            console.error(err);
+                window.location.href = '/';
+
+            }
+
+
+
         });
-    } else {
-        data.id = row.getAttribute('data-id');
-        xhrPut(REST_DATA, data, function() {
-            console.log('updated: ', data);
-        }, function(err) {
-            console.error(err);
-        });
-    }
-}
 
-function toggleServiceInfo() {
-    var node = document.getElementById('vcapservices');
-    node.style.display = node.style.display == 'none' ? '' : 'none';
-}
+        return false;
+    });
 
-function toggleAppInfo() {
-    var node = document.getElementById('appinfo');
-    node.style.display = node.style.display == 'none' ? '' : 'none';
-}
+    //navegação do carousel
+    $('#buttonNext').click(function(){
+        $('#carousel').carousel('next');
+    });
+
+    $('#buttonPrev').click(function(){
+        $('#carousel').carousel('prev');
+    });
+    //
 
 
-function showLoadingMessage() {
-    document.getElementById('loadingImage').innerHTML = "Loading data " + "<img height=\"100\" width=\"100\" src=\"images/loading.gif\"></img>";
-}
-
-function stopLoadingMessage() {
-    document.getElementById('loadingImage').innerHTML = "";
-}
-
-showLoadingMessage();
-//updateServiceInfo();
-loadItems();
+});

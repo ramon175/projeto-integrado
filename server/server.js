@@ -18,7 +18,23 @@ module.exports = function(app){
 
 	app.get('/',(req,res) => {
         res.render('index.html');
-    });
+	});
+	
+	app.get('/nacionais',(req,res) => {
+		res.render('index.html')
+	});
+
+	app.get('/importados',(req,res) => {
+		res.render('index.html')
+	});
+
+	app.get('/cadastrar',(req,res) => {
+		res.render('cadastro.html');
+	});
+
+	app.get('/countries',(req,res) => {
+		res.render('countries.html');
+	});
 	
 
 

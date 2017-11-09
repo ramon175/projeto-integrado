@@ -27,7 +27,6 @@ class User extends CloudantDB {
 		if(doc.type === "USER"){
 			 return this.save(doc).then((dbDoc) => {
 				  var item = Object.assign(doc, dbDoc);
-				  audit.record(item, audit.auditType().CREATE);
 				  return item;
 			  });
 		}else{
@@ -39,7 +38,6 @@ class User extends CloudantDB {
 		if (doc.type === "USER") {
 			return this.update(doc._id, doc).then((dbDoc) => {
 				  var item = Object.assign(doc, dbDoc);
-				  audit.record(item, audit.auditType().UPDATE);
 				  return item;
 			});
 		}else{
@@ -47,10 +45,19 @@ class User extends CloudantDB {
 		}
 	}
 
-	findById(id) {
+	login(id,senha) {
 		var selector = {
 			"_id": id,
+			"senha":senha,
 			"type": "USER"
+		};
+
+		return this.find(selector).then((dbDoc) => dbDoc);
+	}
+
+	findById(id) {
+		var selector = {
+			"_id": id
 		};
 
 		return this.find(selector).then((dbDoc) => dbDoc);
@@ -58,7 +65,6 @@ class User extends CloudantDB {
 
 	deleteById(id) {
 		return this.findById(id).then((dbDoc)=>{
-			audit.record(dbDoc.docs[0], audit.auditType().DELETE);
 			return this.delete(id).then((dbDoc) => dbDoc);
 		});
 	}
