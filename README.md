@@ -2,13 +2,16 @@
 
 Esta aplicação foi desenvolvida para o projeto integrado dos alunos do 6o semestre do curso de Sistemas de Informação da Universidade Anhembi Morumbi
 
+Beatriz Alves
+Lucas Hoberty
+Ramon Castan
+
 ## Run the app locally
 
 1. [Install Node.js][]
-+ cd into this project's root directory
-+ Copy the value for the VCAP_SERVICES envirionment variable from the application running in Bluemix and paste it in a `vcap-local.json` file
-+ Run `npm install` to install the app's dependencies
-+ Run `npm start` to start the app
-+ Access the running app in a browser at <http://localhost:3000>
++ acesse o diretório raiz do projeto
++ execute `npm install` para instalar as dependências do projeto
++ execute `npm start` para iniciar o app localmente
++ Acesse o app através do browser na porta disponibilizada no console <http://localhost:porta>
 
 [Install Node.js]: https://nodejs.org/en/download/

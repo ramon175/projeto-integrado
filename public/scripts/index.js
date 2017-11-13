@@ -18,9 +18,12 @@ $(document).ready(function () {
 
         console.log($.session.get('usuario'));
 
+        $("#cadastrar").parent().parent().append('<li class="nav-item"><a href="#" class="nav-link" >Carrinho</a></li>');
+        $("#cadastrar").hide();
+
         $("#login").html('Logout');
 
-        $("#login").parent().parent().append('<li class="nav-item"><p class="nav-link">Olá ' + $.session.get('usuario') + '</p></li>');
+        $("#login").parent().parent().append('<li class="nav-item"><p class="nav-link" style="border-right:1px solid;">Olá ' + $.session.get('usuario') + '</p></li>');
         
     }
     //
@@ -41,8 +44,10 @@ $(document).ready(function () {
                 continue;
             }
 
-            var btnCarrinho = '<i class="material-icons">add_shopping_cart</i>'
-
+            //botao para adicionar item no carrinho
+            var btnCarrinho = '<i class="material-icons float-right">add_shopping_cart</i>'
+            
+            //html para gerar o card do bootstrap dinamicamente
             var html = '<div class="col-lg-4 col-md-6 mb-4">\
         <div class="card h-100">\
           <a href="#">\
@@ -95,6 +100,7 @@ $(document).ready(function () {
             nome = $("#name").val(),
             razaoSocial = $("#razao").val();
 
+        //objeto do usuario para ser cadastrado no banco
         var userObj = {
             id: email,
             senha,

@@ -12,22 +12,19 @@
 
   <!-- Bootstrap core CSS -->
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/jquery/jquerysession.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/jquery/jquerysession.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
   
-    <script src="scripts/index.js"></script>
+  <script src="scripts/index.js"></script>
 
   <!-- Custom styles for this template -->
   <link href="style/style.css" rel="stylesheet">
 
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-  rel="stylesheet">
-
-  <style>
-    
-  </style>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
 
 </head>
 
@@ -49,13 +46,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Sobre</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Contato</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cadastrar">Cadastrar</a>
+            <a class="nav-link" id="cadastrar" href="/cadastrar">Cadastrar</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" id="login" href="#" style="border-left:1px solid;">Login</a>
@@ -66,7 +57,7 @@
   </nav>
 
   <div id="loginModal" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header">
@@ -75,16 +66,23 @@
 
         </div>
         <div class="modal-body">
-          <form class="form-inline" role="search">
+          <form class="form" role="form">
             <div class="form-group">
-              <input type="text" class="form-control" id="loginEmail" placeholder="Email">
-              <input type="password" class="form-control" id="loginSenha" placeholder="Password">
+              <label for="loginEmail" class="col-form-label">Email:</label>
+              <input type="text" class="form-control" id="loginEmail" name="loginEmail" placeholder="Email" style="margin-right:5px;">
             </div>
-            <button type="submit" id="loginBtn" class="btn btn-info form-control">Sign In</button>
-            <button type="button" class="btn btn-danger form-control" data-dismiss="modal">Cancel</button>
+            <div class="form-group">
+              <label for="loginSenha" class="col-form-label">Senha:</label>
+              <input type="password" class="form-control" id="loginSenha" name="loginSenha" placeholder="Password" style="margin-right:5px;">
+            </div>
             <div id="message">
 
             </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+          <button type="submit" id="loginBtn" class="btn btn-info">Entrar</button>
+
         </div>
         </form>
       </div>
@@ -160,6 +158,8 @@
     </div>
     <!-- /.container -->
   </footer>
+
+  
 
 </body>
 
