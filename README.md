@@ -6,9 +6,9 @@ Beatriz Alves
 Lucas Hoberty
 Ramon Castan
 
-## Run the app locally
+## Rodar o app localmente
 
-1. [Install Node.js][]
+1. Instale o [Node.js][]
 + acesse o diretório raiz do projeto
 + execute `npm install` para instalar as dependências do projeto
 + execute `npm start` para iniciar o app localmente
